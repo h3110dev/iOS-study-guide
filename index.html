@@ -666,15 +666,12 @@
             const activePanel = document.getElementById(topicId);
             if (activePanel) {
                 activePanel.classList.add('active');
-                // Defer subtopic activation to ensure main panel is rendered
-                setTimeout(() => {
-                    const topicData = studyData.find(t => t.id === topicId);
-                    if (topicData && topicData.subTopics.length > 0 && !topicData.isStudyPlan) {
-                        // If a specific subTopicId is provided, use it, otherwise default to the first subtopic
-                        const targetSubTopicId = subTopicId || topicData.subTopics[0].id;
-                        selectSubTopic(topicId, targetSubTopicId);
-                    }
-                }, 10); // A small delay of 10ms
+                // Directly activate subtopic without delay
+                const topicData = studyData.find(t => t.id === topicId);
+                if (topicData && topicData.subTopics.length > 0 && !topicData.isStudyPlan) {
+                    const targetSubTopicId = subTopicId || topicData.subTopics[0].id;
+                    selectSubTopic(topicId, targetSubTopicId);
+                }
             }
 
             // Update topic status display when a topic is selected (if not the study plan)
@@ -687,13 +684,37 @@
         function selectSubTopic(mainTopicId, subTopicId) {
             const mainPanel = document.getElementById(mainTopicId);
             if (!mainPanel) return;
-            mainPanel.querySelectorAll('.tab-link').forEach(link => link.classList.remove('active'));
-            const activeTab = mainPanel.querySelector(`button[data-tab="${subTopicId}"]`);
-            if(activeTab) activeTab.classList.add('active');
 
-            mainPanel.querySelectorAll('.sub-content-panel').forEach(panel => panel.classList.remove('active'));
+            // Ensure the main panel is active before trying to find its children
+            if (!mainPanel.classList.contains('active')) {
+                // This scenario should ideally not happen if selectMainTopic is called first
+                // But as a fallback/defensive check, activate main panel first
+                selectMainTopic(mainTopicId, subTopicId);
+                return;
+            }
+
+            const tabLinks = mainPanel.querySelectorAll('.tab-link');
+            const subContentPanels = mainPanel.querySelectorAll('.sub-content-panel');
+
+            tabLinks.forEach(link => link.classList.remove('active'));
+            subContentPanels.forEach(panel => panel.classList.remove('active'));
+
+            const activeTab = mainPanel.querySelector(`button[data-tab="${subTopicId}"]`);
             const activeSubPanel = mainPanel.querySelector(`#${subTopicId}`);
-            if(activeSubPanel) activeSubPanel.classList.add('active');
+
+            if (activeTab) {
+                activeTab.classList.add('active');
+            } else {
+                // Fallback to first tab if the specific one isn't found (e.g., direct link to main topic)
+                if (tabLinks.length > 0) tabLinks[0].classList.add('active');
+            }
+
+            if (activeSubPanel) {
+                activeSubPanel.classList.add('active');
+            } else {
+                // Fallback to first sub-content panel
+                if (subContentPanels.length > 0) subContentPanels[0].classList.add('active');
+            }
         }
 
         // Calculate originalMaxWeeks dynamically from the studyData
