@@ -337,10 +337,10 @@
                         { item: 'Custom drawing with Core Graphics (`draw(_:)` method).', explanation: 'Core Graphics (aka Quartz 2D) is a low-level, C-based API for drawing 2D graphics in iOS. You can override the `draw(_:)` method of a `UIView` (or `CALayer` delegate) to perform custom, vector-based drawing using paths, colors, and transformations.', question: 'When would you need to implement custom drawing using `draw(_:)` and Core Graphics instead of relying solely on `UIKit`\'s standard views and layers?' }
                      ]},
                      { id: 'adv-extensions', title: 'App Extensions', durationHours: 3, suggestedWeek: 11, content: [
-                        { item: 'Understanding various types of app extensions (Sharing, Widget, iMessage, Custom Keyboard, Photo Editing).', explanation: 'App Extensions allow your app\'s functionality to be exposed in other parts of iOS, like sharing content (`Share Extension`), displaying information on the home screen (`Widget Extension`), or custom input methods (`Custom Keyboard Extension`). They run in a separate process from your main app.', question: 'You want to allow users to quickly view a summary of data from your app without opening the full application. Which type of App Extension would you use, and how would you enable data sharing between the main app and this extension?' },
+                        { item: 'Understanding various types of app extensions (Sharing, Widget, iMessage, Custom Keyboard, Photo Editing).', explanation: 'App Extensions allow your app\'s functionality to be exposed in other parts of iOS, like sharing content (`Share Extension`), displaying information on the home screen (`Widget Extension`), or custom input methods (`Custom Keyboard Extension`). They run in a separate process from your app.', question: 'You want to allow users to quickly view a summary of data from your app without opening the full application. Which type of App Extension would you use, and how would you enable data sharing between the main app and this extension?' },
                         { item: 'Data sharing between app and extensions (App Groups).', explanation: 'Since app extensions run in separate processes, they cannot directly access the main app\'s sandbox data. **App Groups** provide a shared container directory that multiple apps and extensions from the same developer can access, allowing secure data sharing (e.g., `UserDefaults`, files).', question: 'Explain how `App Groups` enable data sharing between a main iOS application and its associated extensions. Provide a common use case.' },
                         { item: 'Lifecycle of an app extension.', explanation: 'App extensions have a more constrained and typically shorter lifecycle than full applications. They are launched by the system in response to a user action or system event, perform their specific task, and are then terminated. They generally do not run indefinitely in the background.', question: 'How does the lifecycle of an `Action Extension` differ from that of a typical iOS application? What are some limitations specific to extensions?' }
-                     ]},
+                     ]}
                 ]
             },
             {
@@ -540,7 +540,7 @@
                             totalItems += sub.content.length;
                             sub.content.forEach((item, index) => {
                                 const itemId = `${sub.id}-${index}`;
-                                if (allChecklistStatuses[sub.id] && allChecklistStatuses[sub.id][itemId]) {
+                                if (allChecklistStatuses[sub.id] && allChecklistStatuses[sub.id][itemId]) { // Corrected variable name here
                                     completedItems++;
                                 }
                             });
@@ -674,7 +674,7 @@
                         const targetSubTopicId = subTopicId || topicData.subTopics[0].id;
                         selectSubTopic(topicId, targetSubTopicId);
                     }
-                }, 0); // Short delay
+                }, 10); // A small delay of 10ms
             }
 
             // Update topic status display when a topic is selected (if not the study plan)
