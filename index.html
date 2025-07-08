@@ -540,7 +540,7 @@
                             totalItems += sub.content.length;
                             sub.content.forEach((item, index) => {
                                 const itemId = `${sub.id}-${index}`;
-                                if (allChecklistStatuses[sub.id] && allChecklistStatuses[sub.id][itemId]) { // Corrected variable name here
+                                if (allChecklistStatuses[sub.id] && allChecklistStatuses[sub.id][itemId]) {
                                     completedItems++;
                                 }
                             });
@@ -652,30 +652,38 @@
 
         // Function to handle main topic selection, and optionally subtopic tab
         function selectMainTopic(topicId, subTopicId = null) {
+            // Clear active state from all sidebar links
             document.querySelectorAll('.sidebar-link').forEach(link => {
                 if (link) link.classList.remove('active');
             });
+            // Set active state for the current sidebar link
             const activeLink = document.querySelector(`a[href="#${topicId}"]`);
             if (activeLink) {
                 activeLink.classList.add('active');
             }
 
+            // Hide all content panels
             document.querySelectorAll('.content-panel').forEach(panel => {
                 if (panel) panel.classList.remove('active');
             });
+            // Show the selected content panel
             const activePanel = document.getElementById(topicId);
             if (activePanel) {
                 activePanel.classList.add('active');
-                // Directly activate subtopic without delay
+
+                // If it's not the study plan, activate the correct subtopic tab
                 const topicData = studyData.find(t => t.id === topicId);
-                if (topicData && topicData.subTopics.length > 0 && !topicData.isStudyPlan) {
-                    const targetSubTopicId = subTopicId || topicData.subTopics[0].id;
-                    selectSubTopic(topicId, targetSubTopicId);
+                if (topicData && !topicData.isStudyPlan && topicData.subTopics.length > 0) {
+                    // Use requestAnimationFrame to ensure DOM is ready for tab activation
+                    requestAnimationFrame(() => {
+                        const targetSubTopicId = subTopicId || topicData.subTopics[0].id;
+                        selectSubTopic(topicId, targetSubTopicId);
+                    });
                 }
             }
 
             // Update topic status display when a topic is selected (if not the study plan)
-            if (!studyData.find(t => t.id === topicId).isStudyPlan) { // Check if it's not the study plan page
+            if (!studyData.find(t => t.id === topicId).isStudyPlan) {
                 updateTopicStatusDisplay(topicId);
             }
         }
@@ -685,34 +693,28 @@
             const mainPanel = document.getElementById(mainTopicId);
             if (!mainPanel) return;
 
-            // Ensure the main panel is active before trying to find its children
-            if (!mainPanel.classList.contains('active')) {
-                // This scenario should ideally not happen if selectMainTopic is called first
-                // But as a fallback/defensive check, activate main panel first
-                selectMainTopic(mainTopicId, subTopicId);
-                return;
-            }
-
             const tabLinks = mainPanel.querySelectorAll('.tab-link');
             const subContentPanels = mainPanel.querySelectorAll('.sub-content-panel');
 
+            // Deactivate all tabs and sub-content panels within the main topic
             tabLinks.forEach(link => link.classList.remove('active'));
             subContentPanels.forEach(panel => panel.classList.remove('active'));
 
+            // Activate the targeted tab and its corresponding content panel
             const activeTab = mainPanel.querySelector(`button[data-tab="${subTopicId}"]`);
             const activeSubPanel = mainPanel.querySelector(`#${subTopicId}`);
 
             if (activeTab) {
                 activeTab.classList.add('active');
             } else {
-                // Fallback to first tab if the specific one isn't found (e.g., direct link to main topic)
+                // Fallback: if the specific subTopicId button isn't found, activate the first one
                 if (tabLinks.length > 0) tabLinks[0].classList.add('active');
             }
 
             if (activeSubPanel) {
                 activeSubPanel.classList.add('active');
             } else {
-                // Fallback to first sub-content panel
+                // Fallback: if the specific sub-content panel isn't found, activate the first one
                 if (subContentPanels.length > 0) subContentPanels[0].classList.add('active');
             }
         }
@@ -1017,9 +1019,7 @@
                 navLink.className = 'block sidebar-link font-medium text-gray-700 py-2 px-4 rounded-md flex items-center space-x-2';
                 navLink.addEventListener('click', (e) => {
                     e.preventDefault();
-                    // When clicking sidebar link, only navigate to main topic, don't auto-select subtopic
-                    // The main topic page will default to its first subtopic or retain current one
-                    selectMainTopic(topic.id);
+                    selectMainTopic(topic.id); // Navigate to main topic
                 });
 
                 const iconSpan = document.createElement('span');
@@ -1108,15 +1108,13 @@
                     if (infoDiv) {
                         infoDiv.classList.toggle('hidden');
                     }
-                } else if (e.target.matches('.study-plan-topic-link')) {
+                } else if (e.target.closest('.study-plan-topic-link')) { // Use closest() to find the anchor tag
                     e.preventDefault(); // Prevent default link behavior
-                    const topicId = e.target.dataset.topicId;
-                    const subTopicId = e.target.dataset.subtopicId; // Get the subtopic ID
-                    if (topicId && subTopicId) {
-                        selectMainTopic(topicId, subTopicId); // Pass both IDs
-                    } else if (topicId) {
-                        selectMainTopic(topicId); // Fallback if only main topic ID is present (shouldn't happen with new links)
-                    }
+                    const linkElement = e.target.closest('.study-plan-topic-link');
+                    const topicId = linkElement.dataset.topicId;
+                    const subTopicId = linkElement.dataset.subtopicId;
+                    // Navigate to the main topic, and then activate the subtopic
+                    selectMainTopic(topicId, subTopicId);
                 }
             });
         });
