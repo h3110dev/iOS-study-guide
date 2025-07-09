@@ -10,7 +10,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!--
-        Chosen Palette: Warm Harmony
         Application Structure Plan: The application now defaults to the "Study Plan" section as the home page, allowing immediate setup of a personalized schedule. A persistent sidebar enables main topic navigation, and a tab-based interface manages sub-topics within the main content area. This two-level structure prevents overwhelming the user and facilitates focused study. Interactive checklists allow users to track progress, visually represented by dynamic donut charts. Crucially, each non-study-plan topic page now integrates its specific study status (Upcoming, In Progress, Past Due) based on the globally set start date, providing contextual awareness of the schedule. This gamified and actionable approach enhances user engagement and progress tracking.
         Visualization & Content Choices:
         - Report Info: Hierarchical list of iOS interview topics. -> Goal: Organize and track study progress. -> Viz/Presentation: A main sidebar navigation controls visibility of content sections. Each section has its own sub-navigation (tabs) for drilling down. -> Interaction: Users click navigation elements to switch views. Checkboxes next to each topic allow users to mark them as "studied". -> Justification: This interactive structure breaks down the vast amount of information into digestible chunks, making it less intimidating and easier to navigate.
@@ -142,222 +141,132 @@
         let currentStudyStartDate = null; // Will store the Date object of the selected start date
         let allChecklistStatuses = {}; // Stores completion status of individual checklist items
 
+        // UPDATED and more comprehensive study data based on the new syllabus
         const studyData = [
             {
                 id: 'study-plan',
                 title: 'Study Plan',
-                description: 'Welcome to your personalized iOS Interview Study Guide! This interactive web application is designed to help experienced software developers like you prepare for iOS technical interviews by providing a comprehensive, structured curriculum and a dynamic study planner. Whether you\'re brushing up on core Swift concepts, diving deep into UIKit, mastering concurrency, or preparing for system design questions, this guide has you covered. Set your preferred start date below, and let\'s build your ideal study journey together!',
+                description: 'Welcome to your personalized iOS Interview Study Guide! This interactive web application is designed to help you prepare for iOS technical interviews by providing a comprehensive, structured curriculum and a dynamic study planner. Set your preferred start date below, and let\'s build your ideal study journey together!',
                 isStudyPlan: true,
-                subTopics: [] // No subtopics for the study plan page itself
+                subTopics: []
             },
             {
-                id: 'swift-fundamentals',
-                title: 'I. Swift Language & Fundamentals',
-                cleanTitle: 'Swift Language & Fundamentals',
-                description: 'This section provides a deep dive into the Swift language itself, from memory management principles to advanced features like generics and protocols. A strong command of these topics is foundational for any iOS developer.',
+                id: 'swift-deep-dive',
+                title: 'I. Swift Language Deep Dive',
+                cleanTitle: 'Swift Language Deep Dive',
+                description: 'A thorough understanding of the Swift language is the cornerstone of any iOS developer\'s skillset. This section covers memory management, type systems, concurrency models, and advanced language features.',
                 subTopics: [
-                    { id: 'swift-memory', title: 'Memory Management', durationHours: 6, suggestedWeek: 1, content: [
-                        { item: 'Strong, Weak, Unowned references: Use cases in closures and delegates.', explanation: 'In Swift, Automatic Reference Counting (ARC) manages memory. Strong references keep an object in memory, weak references allow deallocation when no strong references exist and become `nil` automatically, and unowned references are used when a reference will always have a value but should not create a strong cycle, crashing if accessed when `nil`.', question: 'Describe a scenario where using an `unowned` reference would be appropriate over a `weak` reference, and explain the potential risks if your assumption about its lifecycle is incorrect.' },
-                        { item: 'Understanding Retain Cycles and how to avoid them (e.g., using capture lists).', explanation: 'A retain cycle occurs when two or more objects hold strong references to each other, preventing them from being deallocated. This is a common memory leak. Avoid them by using `weak` or `unowned` references in closures and delegate patterns where appropriate.', question: 'Provide a code example illustrating a common retain cycle in iOS and demonstrate how to resolve it using a capture list.' },
-                        { item: 'Difference between Value Types (Structs, Enums) and Reference Types (Classes) in memory.', explanation: 'Value types (structs, enums, basic types) are copied when assigned or passed, creating independent instances. Reference types (classes) are shared by reference, meaning multiple variables can point to the same instance in memory. This affects memory management and behavior.', question: 'When would you choose a `struct` over a `class` in Swift, specifically considering memory management and behavior implications?' },
-                        { item: 'Using Instruments (Allocations, Leaks) for memory debugging.', explanation: 'Xcode Instruments is a powerful tool. The **Allocations** instrument tracks all memory allocations and deallocations, helping identify excessive memory usage. The **Leaks** instrument specifically detects retain cycles and unreleased memory by showing cycles in your object graph.', question: 'Outline the steps you would take to debug a suspected memory leak in your iOS application using Xcode Instruments.' }
-                    ]},
-                    { id: 'swift-protocols', title: 'Protocols', durationHours: 7, suggestedWeek: 1, content: [
-                        { item: 'Protocol-Oriented Programming (POP) principles: Benefits over class inheritance, reusable components.', explanation: 'Protocol-Oriented Programming (POP) emphasizes using protocols to define behavior, fostering flexible, reusable, and testable code. It often offers advantages over class inheritance by enabling multiple "inheritance" of behavior and better separation of concerns, leading to more composable designs.', question: 'Explain the "prefer protocols over concrete types" principle in Swift, and how protocol extensions facilitate code reuse without class inheritance.' },
-                        { item: 'Understanding Protocol Conformance and Extensions.', explanation: 'A type **conforms** to a protocol by implementing all its required methods and properties. **Protocol extensions** allow you to provide a default implementation for protocol requirements or add new functionality to conforming types, making protocols even more powerful for code reuse.', question: 'Demonstrate how to provide a default implementation for a protocol method using a protocol extension. What are the limitations when overriding such a default implementation?' },
-                        { item: 'Associated Types and Opaque Return Types (`some Protocol`).', explanation: 'Protocols with **associated types** define a placeholder name for a type that is used as part of the protocol. **Opaque return types** (using `some Protocol`) allow a function to hide the concrete type of the value it returns, while still ensuring that it conforms to a given protocol.', question: 'Explain the purpose of an `associatedtype` in a Swift protocol and provide a simple example of its use. How does `some Protocol` relate to this concept?' }
-                    ]},
-                     { id: 'swift-generics', title: 'Generics', durationHours: 5, suggestedWeek: 2, content: [
-                        { item: 'Writing generic functions and types: Flexible and reusable code.', explanation: 'Generics allow you to write flexible, reusable functions and types that can work with any type, provided they meet certain requirements (type constraints). This avoids code duplication and provides strong type safety at compile-time.', question: 'You have two functions that perform similar operations on different collection types (e.g., `Array<Int>` and `Array<String>`). How would you refactor these using generics to make the code more reusable and type-safe?' },
-                        { item: 'Type Constraints and where clauses.', explanation: 'Type constraints specify that a generic type parameter must inherit from a specific class or conform to a specific protocol (or protocols). `where` clauses provide a flexible way to add more complex constraints to generic declarations, such as requiring a type to be a class or a protocol to have a specific associated type.', question: 'When would you use a `where` clause in a generic declaration instead of a simple type constraint? Provide an example.' },
-                        { item: 'Generic Protocols.', explanation: 'A generic protocol is a protocol that uses associated types to define a generic interface. This allows the protocol to define requirements that depend on a placeholder type, making the protocol more adaptable and reusable across different concrete types.', question: 'Design a generic protocol for a "Cache" that can store and retrieve values of any `Codable` type. Demonstrate its basic usage.' }
-                    ]},
-                    { id: 'swift-advanced', title: 'Advanced Concepts', durationHours: 8, suggestedWeek: 2, content: [
-                         { item: 'Property Wrappers: Encapsulating logic, creating custom wrappers.', explanation: 'Property wrappers provide a way to add a layer of separation between code that manages how a property is stored/computed and the code that defines a property. They allow common property patterns (like validation, persistence, or thread-safety) to be reused across multiple properties with minimal boilerplate.', question: 'Design a simple `@Clamped` property wrapper that ensures an `Int` property always stays within a specified minimum and maximum range. Provide an example of its usage.' },
-                         { item: 'Result Builders (e.g., for SwiftUI DSLs).', explanation: 'Result Builders (formerly Function Builders) allow you to create a Domain Specific Language (DSL) that implicitly transforms a sequence of expressions into a single, complex result. They are heavily used in SwiftUI for building view hierarchies declaratively.', question: 'Explain the core concept of a Result Builder and how it enables the declarative syntax of SwiftUI views. You don\'t need to implement one, just describe its role.' },
-                         { item: 'Key Paths (`\\KeyPath`).', explanation: 'Key Paths provide a type-safe way to refer to properties of a type. They allow you to write generic code that operates on properties without knowing their specific names at compile time. They are particularly useful for KVO, filtering, and sorting collections.', question: 'Describe a practical use case for Swift Key Paths beyond simple property access, such as for sorting an array of objects.' },
-                         { item: 'Dynamic Callable and Dynamic Member Lookup.', explanation: '`@dynamicCallable` allows an instance of a type to be called like a function. `@dynamicMemberLookup` enables access to members by name that are not explicitly declared on the type, often used for bridging with dynamic languages or implementing custom data structures.', question: 'Briefly explain the purpose of `@dynamicCallable` and `@dynamicMemberLookup` and provide a hypothetical scenario where one might be useful in an iOS app.' }
-                    ]},
+                    {
+                        id: 'swift-memory', title: 'Memory & Types', durationHours: 6, suggestedWeek: 1, content: [
+                            { item: 'Automatic Reference Counting (ARC): strong, weak, and unowned references.', explanation: 'ARC automatically frees up memory used by class instances when they are no longer needed. `strong` is the default reference type that keeps an instance alive. `weak` is an optional reference that doesn\'t keep an instance alive and becomes `nil` when the instance is deallocated. `unowned` is a non-optional reference that also doesn\'t keep an instance alive, but you must be certain the instance will not be deallocated while the reference exists.', question: 'Explain a scenario where a retain cycle can occur with closures. How would you use a capture list with `weak` or `unowned` to break this cycle?' },
+                            { item: 'Value Types (struct, enum) vs. Reference Types (class) and copy-on-write.', explanation: 'Value types are copied when assigned or passed, creating independent instances. Reference types share a single instance. This fundamentally affects how data is mutated and passed around. Copy-on-write (CoW) is an optimization where a value type shares its underlying data until it is modified, at which point a unique copy is made.', question: 'When would you choose a `struct` over a `class`? Provide an example where the choice significantly impacts your app\'s behavior or performance.' },
+                            { item: 'Optionals: Safe unwrapping (if let, guard let), optional chaining, and nil-coalescing.', explanation: 'Optionals handle the presence or absence of a value. Safe unwrapping with `if let` or `guard let` conditionally binds the value to a new constant. Optional chaining (`?`) allows calling properties or methods on an optional that might be `nil`. The nil-coalescing operator (`??`) provides a default value for a `nil` optional.', question: 'Why should you avoid force unwrapping (`!`) in production code? Describe a situation where using the `map` or `flatMap` functions on an Optional can be more concise than using `if let`.' }
+                        ]
+                    },
+                    {
+                        id: 'swift-features', title: 'Language Features', durationHours: 7, suggestedWeek: 1, content: [
+                            { item: 'Closures: Capture lists, escaping and non-escaping closures.', explanation: 'Closures are self-contained blocks of functionality. They can "capture" constants and variables from their surrounding context. `@escaping` closures can be executed after the function they were passed into returns, whereas non-escaping closures cannot.', question: 'What is the purpose of an `@autoclosure`? Provide a practical example of its use.' },
+                            { item: 'Protocols: Protocol-Oriented Programming (POP), extensions, and associated types.', explanation: 'POP is a design paradigm that favors composing functionality through protocols. Protocol extensions can provide default implementations for methods, and `associatedtype` allows for creating generic protocols.', question: 'How can you use protocol extensions to add functionality to types you don\'t own, like `String` or `Array`? What are the limitations of this approach?' },
+                            { item: 'Generics: Type parameters, generic constraints, and opaque types (`some Protocol`).', explanation: 'Generics allow you to write flexible, reusable code that works with any type, subject to specified constraints. Opaque types (`some Protocol`) hide the concrete return type of a function, providing abstraction while guaranteeing a specific protocol conformance.', question: 'Explain the difference between using a generic type parameter (`<T: Equatable>`) and using `some Equatable` as a return type.' },
+                            { item: 'Error Handling: do-catch, try, try?, try!, and the Result type.', explanation: 'Swift\'s formal error handling model allows functions to `throw` errors, which are then handled in a `do-catch` block. `try?` converts an error into an optional `nil`, while `try!` asserts that no error will occur. The `Result` type explicitly represents either a success with a value or a failure with an error.', question: 'When would you use the `Result` type for an asynchronous operation instead of a traditional completion handler with `(Data?, Error?)` parameters?' }
+                        ]
+                    },
+                    {
+                        id: 'swift-concurrency', title: 'Concurrency', durationHours: 8, suggestedWeek: 2, content: [
+                            { item: 'GCD: DispatchQueues (serial, concurrent), DispatchGroups, Semaphores.', explanation: 'Grand Central Dispatch (GCD) is a low-level API for managing concurrent operations. `DispatchQueue` manages the execution of tasks. `DispatchGroup` allows you to track the completion of a group of tasks. `DispatchSemaphore` controls access to a shared resource by multiple threads.', question: 'You need to download three images concurrently and then update the UI only after all three are downloaded. How would you use a `DispatchGroup` to achieve this?' },
+                            { item: '`Operation` & `OperationQueue`: Dependencies and subclassing.', explanation: '`Operation` is a high-level abstraction over GCD that allows for more complex behaviors like setting dependencies between operations, canceling, and observing state changes. You can subclass `Operation` for reusable, complex tasks.', question: 'Describe a scenario where `OperationQueue` is a better choice than using GCD directly. How would you make an `Operation` dependent on another?' },
+                            { item: 'Swift Concurrency: `async/await`, `Task`, `TaskGroup`.', explanation: 'Modern Swift Concurrency provides a safer and more readable way to write asynchronous code. `async/await` allows you to write async code that looks sequential. A `Task` is a unit of async work. A `TaskGroup` allows for dynamically creating a group of concurrent child tasks.', question: 'How does Structured Concurrency in Swift help prevent task leakage compared to older concurrency models like GCD?' },
+                            { item: '`Actors` for isolating mutable state and `@MainActor` for UI updates.', explanation: 'An `Actor` is a reference type that protects its mutable state from concurrent access, preventing data races. `@MainActor` is a global actor that ensures code runs on the main thread, which is essential for safe UI updates.', question: 'Explain how an `Actor` prevents data races. What happens when you try to access a property or call a method on an actor from outside of it?' }
+                        ]
+                    },
+                     {
+                        id: 'swift-advanced-concepts', title: 'Advanced Topics', durationHours: 5, suggestedWeek: 2, content: [
+                            { item: 'Property Wrappers: Encapsulating property logic (e.g., @Published).', explanation: 'Property wrappers add a layer of separation between code that manages how a property is stored and the code that defines a property. They are reusable structures that encapsulate custom logic for property getting and setting. Examples include SwiftUI\'s `@State` or Combine\'s `@Published`.', question: 'Design a simple `@UserDefault` property wrapper that automatically reads and writes a property\'s value to `UserDefaults`.' },
+                            { item: 'Access Control: open, public, internal, fileprivate, private.', explanation: 'Access control restricts access to parts of your code from code in other source files and modules. `private` is the most restrictive, `fileprivate` restricts to the current file, `internal` is the default, `public` allows access from other modules, and `open` (for classes) allows subclassing from other modules.', question: 'What is the difference between `public` and `open`? When would you use `fileprivate`?' },
+                            { item: 'Key-Value Coding (KVC) and Key-Value Observing (KVO).', explanation: 'KVC is a mechanism for accessing an object\'s properties indirectly, using strings to identify properties. KVO allows an object to observe changes to another object\'s properties. These are Objective-C patterns, but still available and sometimes used in Swift, especially with `NSObject` subclasses.', question: 'While modern Swift prefers other patterns (like Combine or `didSet`), describe a scenario where KVO might still be useful in an iOS project.' }
+                        ]
+                    }
                 ]
             },
             {
-                id: 'concurrency',
-                title: 'II. Concurrency & Asynchronous Programming',
-                cleanTitle: 'Concurrency & Asynchronous Programming',
-                description: 'Concurrency is critical for responsive and performant applications. This section covers everything from the classic Grand Central Dispatch (GCD) to modern Swift Concurrency features like async/await and Actors.',
+                id: 'ios-core-concepts',
+                title: 'II. iOS Frameworks & Core Concepts',
+                cleanTitle: 'iOS Frameworks & Concepts',
+                description: 'Mastering the core frameworks is essential for building any iOS application. This section covers UI, data management, and networking fundamentals.',
                 subTopics: [
-                    { id: 'concurrency-gcd', title: 'GCD', durationHours: 7, suggestedWeek: 3, content: [
-                        { item: 'Dispatch Queues: Serial, Concurrent, Main.', explanation: 'GCD uses dispatch queues to execute tasks. **Serial queues** execute tasks one at a time in FIFO order, ensuring resource synchronization. **Concurrent queues** execute tasks concurrently, but still in FIFO submission order, allowing multiple tasks to run simultaneously. The **Main queue** is a serial queue on the main thread, essential for UI updates.', question: 'You need to perform a network request and then update the UI. Explain how you would use GCD to ensure the UI update happens safely on the main thread after the background network task completes.' },
-                        { item: 'Understanding synchronous vs. asynchronous execution.', explanation: 'A **synchronous** function returns control to the caller only after completing its task. An **asynchronous** function returns immediately, allowing the caller to continue execution while the task runs in the background. Asynchronous operations are crucial for keeping the UI responsive.', question: 'Explain the difference between `dispatch_sync` and `dispatch_async`. When would using `dispatch_sync` on the main queue lead to a deadlock?' },
-                        { item: 'Using DispatchGroup for task synchronization.', explanation: '`DispatchGroup` allows you to monitor a group of tasks and be notified when all of them complete. You use `enter()` when a task begins, `leave()` when it finishes, and `notify(queue:execute:)` to execute a block when the group becomes empty.', question: 'You need to download data from three different API endpoints concurrently and then combine their results to update the UI. How would you use `DispatchGroup` to achieve this efficiently and safely?' },
-                        { item: 'Implementing DispatchWorkItem and cancellation.', explanation: '`DispatchWorkItem` encapsulates a block of code that can be dispatched to a queue. It provides methods for cancellation, allowing you to prevent the work item from executing if it\'s no longer needed before it starts or to stop it gracefully if it\'s already running and supports cancellation checks.', question: 'Describe a scenario where `DispatchWorkItem` and its cancellation capability would be beneficial for managing a background task in your app.' }
-                    ]},
-                    { id: 'concurrency-operation', title: 'Operation & OperationQueue', durationHours: 5, suggestedWeek: 3, content: [
-                        { item: 'Advantages over GCD (dependencies, cancellation, KVO).', explanation: '`OperationQueue` builds on GCD and provides more high-level features like dependencies between operations, cancellability, pause/resume, and KVO for monitoring operation states. This makes it suitable for complex, interdependent asynchronous tasks compared to GCD\'s lower-level primitives.', question: 'Describe a scenario where `OperationQueue` would be a more suitable choice for managing concurrent tasks than GCD, specifically focusing on the benefits of its features like dependencies.' },
-                        { item: 'Creating custom `Operation` subclasses.', explanation: 'You can create custom `Operation` subclasses to encapsulate complex, reusable units of work. By overriding `main()` for synchronous operations or managing `isExecuting` and `isFinished` properties for asynchronous operations, you gain fine-grained control over task execution and state.', question: 'Outline the steps and key properties/methods you would override to create a custom, asynchronous `Operation` subclass that performs a network request.' },
-                        { item: 'Managing operation dependencies.', explanation: '`OperationQueue` allows you to define dependencies between operations, ensuring that one operation does not start until all its dependent operations have finished. This is crucial for tasks that must execute in a specific order but can still run concurrently where possible.', question: 'You have three tasks: A, B, and C. Task C depends on both Task A and Task B completing. How would you set up these dependencies using `OperationQueue`?' }
-                    ]},
-                    { id: 'concurrency-swift', title: 'Swift Concurrency', durationHours: 8, suggestedWeek: 4, content: [
-                        { item: 'async/await syntax and structured concurrency.', explanation: 'Swift Concurrency (introduced in Swift 5.5) provides `async/await` for writing asynchronous code in a sequential, readable style, and **structured concurrency** which ensures that tasks are logically organized, their lifetimes are managed, and cancellation propagates effectively through a task hierarchy.', question: 'Explain how `async/await` improves code readability and safety compared to traditional completion handler-based asynchronous patterns. Discuss the concept of `TaskGroup` for concurrent execution.' },
-                        { item: 'Understanding `Task` and `TaskGroup`.', explanation: 'A `Task` represents a unit of asynchronous work. A `TaskGroup` allows you to create and manage a dynamic collection of child tasks, providing a structured way to perform multiple asynchronous operations concurrently and await their results.', question: 'You need to fetch data from multiple independent API endpoints concurrently and process their results as they arrive. How would you use `TaskGroup` to manage these asynchronous operations?' },
-                        { item: 'Using `Actors` for thread-safe mutable state.', explanation: '`Actors` are reference types that protect their mutable state by ensuring that only one task can access that state at a time. This prevents data races and simplifies concurrent programming by providing a built-in isolation mechanism.', question: 'Explain how `Actors` address the problem of data races in concurrent programming. Provide a simple example of how an `Actor` can be used to manage a shared resource safely.' },
-                        { item: 'MainActor and isolated contexts.', explanation: '`@MainActor` is a global actor that represents the main thread. Marking a class, struct, function, or property with `@MainActor` ensures that access to its state or execution of its code always happens on the main thread, making UI updates safe. Isolated contexts enforce actor isolation rules at compile time.', question: 'Why is it crucial to update UI elements only on the main thread? How does `@MainActor` help enforce this rule in Swift Concurrency?' }
-                    ]},
+                    {
+                        id: 'ios-ui', title: 'UI & Layout', durationHours: 9, suggestedWeek: 3, content: [
+                            { item: 'App and UIViewController lifecycles.', explanation: 'The app lifecycle includes states like `active`, `inactive`, and `background`. The `UIViewController` lifecycle includes methods like `viewDidLoad`, `viewWillAppear`, `viewDidLayoutSubviews`, and `viewDidDisappear`, which are critical for setting up UI, loading data, and cleaning up resources.', question: 'In which `UIViewController` lifecycle method would you perform initial data loading from a network? What about view-related setup that depends on the view\'s final size?' },
+                            { item: '`UITableView` and `UICollectionView`: Cell reuse, prefetching, and custom layouts.', explanation: 'These are fundamental for displaying lists of data. Cell reuse (`dequeueReusableCell`) is critical for performance. Prefetching allows for loading data for cells before they come on screen. Custom layouts can be achieved with `UICollectionViewLayout` subclasses.', question: 'Explain the purpose of `prepareForReuse()` on a `UITableViewCell`. What kind of cleanup would you typically do there?' },
+                            { item: 'Auto Layout: Constraints, priorities, intrinsic content size, and debugging.', explanation: 'Auto Layout is a constraint-based system for defining adaptive user interfaces. `intrinsicContentSize` is a view\'s natural size. Priorities resolve conflicts between constraints. Debugging often involves inspecting the view hierarchy and identifying conflicting or ambiguous constraints.', question: 'You have two labels side-by-side. How would you use Content Hugging and Compression Resistance priorities to ensure one label grows to fill space while the other stays at its intrinsic width?' },
+                             { item: '`UIGestureRecognizer` and creating custom UI components.', explanation: '`UIGestureRecognizer` subclasses (e.g., `UITapGestureRecognizer`, `UIPanGestureRecognizer`) are used to detect user interactions. Custom components are typically created by subclassing `UIView` or `UIControl` and can involve custom drawing with `draw(_:)` and handling touches.', question: 'Outline the steps to create a simple custom circular switch control by subclassing `UIControl`. What properties and methods would be essential?' }
+                        ]
+                    },
+                    {
+                        id: 'ios-data', title: 'Data & Networking', durationHours: 7, suggestedWeek: 4, content: [
+                            { item: 'Data Persistence: `UserDefaults`, `Core Data`, `Realm`, `Codable`.', explanation: '`UserDefaults` is for simple key-value data. `Codable` is for encoding/decoding data to formats like JSON. `Core Data` is Apple\'s powerful framework for managing an object graph and persistence. `Realm` is a popular third-party alternative.', question: 'What is a `NSManagedObjectContext` in Core Data and why is it important for thread safety?' },
+                            { item: 'Offline storage and data syncing strategies.', explanation: 'A robust app should work offline. This involves caching data locally (e.g., in Core Data or Realm) and having a strategy to sync with a server when connectivity is restored. Strategies can include pull-to-refresh, background fetch, or push-triggered updates.', question: 'Design a basic strategy for an app feature that allows a user to "like" a post while offline. How would you queue this action and sync it later?' },
+                            { item: '`URLSession`: Data, download, and upload tasks.', explanation: '`URLSession` is the primary API for networking in iOS. It can be used for simple data tasks (fetching JSON), as well as background download and upload tasks for large files.', question: 'How do you handle network errors, such as a timeout or no internet connection, when using `URLSession`? What is the role of the `URLSessionDelegate`?' },
+                            { item: 'REST APIs, JSON, and secure communication (HTTPS, Keychain).', explanation: 'Most iOS apps communicate with a server via a RESTful API, typically using JSON as the data format. All communication should use HTTPS to be secure. For storing sensitive data like auth tokens on the device, the `Keychain` provides encrypted storage.', question: 'What is the purpose of SSL Pinning? What are its benefits and drawbacks?' }
+                        ]
+                    }
                 ]
             },
             {
-                id: 'uikit',
-                title: 'III. UIKit & User Interface',
-                cleanTitle: 'UIKit & User Interface',
-                description: 'A deep understanding of UIKit is essential for building sophisticated and performant user interfaces. This section explores view lifecycles, layout systems, and complex components like collection views.',
-                subTopics: [
-                    { id: 'uikit-lifecycle', title: 'Lifecycle', durationHours: 4, suggestedWeek: 4, content: [
-                        { item: 'UIView & UIViewController Lifecycle: `viewDidLoad`, `viewWillAppear`, `viewDidAppear`, etc.', explanation: '`UIViewController` and `UIView` instances go through various states during their lifetime. Key methods like `viewDidLoad` (view loaded into memory once), `viewWillAppear` (view about to appear), `viewDidAppear` (view has appeared), `viewWillDisappear` (view about to disappear), and `viewDidDisappear` (view has disappeared) are called at specific points, allowing developers to manage resources and UI.', question: 'When would you prefer to load data from a remote server in `viewDidLoad` versus `viewDidAppear`? Justify your choice and explain potential side effects.' },
-                        { item: 'Understanding View Controller containment.', explanation: 'View controller containment is a powerful way to compose complex user interfaces from simpler view controllers. It involves one view controller (the parent) managing the lifecycle and view hierarchy of another view controller (the child).', question: 'Describe a scenario where View Controller containment would be beneficial, and outline the key steps to implement it programmatically.' },
-                        { item: 'Differences between View and Controller lifecycles.', explanation: 'While related, a `UIView`\'s lifecycle primarily revolves around its drawing and layout (`layoutSubviews`, `draw(_:)`), whereas a `UIViewController`\'s lifecycle manages the view hierarchy and its presentation state (`viewDidLoad`, `viewDidAppear`). A controller manages a view, but their lifecycles are distinct.', question: 'Explain the relationship between a `UIViewController`\'s `viewDidLayoutSubviews()` method and a `UIView`\'s `layoutSubviews()`. When should each be used?' }
-                    ]},
-                    { id: 'uikit-layout', title: 'Auto Layout', durationHours: 6, suggestedWeek: 4, content: [
-                        { item: 'Programmatic Auto Layout: Anchors, Visual Format Language (VFL).', explanation: 'Auto Layout is Apple\'s constraint-based layout system. Programmatic Auto Layout allows you to define constraints directly in code using `NSLayoutAnchor` for a modern, type-safe approach or `Visual Format Language (VFL)` for a more concise (but string-based) representation of layouts.', question: 'Describe how `intrinsicContentSize`, Compression Resistance, and Content Hugging priorities work together in Auto Layout to determine the size of a custom view. Provide a practical example.' },
-                        { item: 'Understanding `intrinsicContentSize`, Compression Resistance, and Content Hugging priorities.', explanation: '`intrinsicContentSize` is a view\'s natural size given its content. **Content Hugging Priority** resists a view from growing larger than its intrinsic content size. **Compression Resistance Priority** resists a view from shrinking smaller than its intrinsic content size. These priorities resolve ambiguity when multiple constraints compete.', question: 'You have a `UILabel` next to a `UITextField`. How would you use content hugging and compression resistance priorities to ensure the label displays its full text while the text field expands to fill available space?' },
-                        { item: 'Debugging Auto Layout issues.', explanation: 'Debugging Auto Layout issues often involves looking at console warnings about ambiguous layouts or broken constraints. Tools like the "Debug View Hierarchy" in Xcode (the 3D view) help visualize constraints and view frames, while setting symbolic breakpoints on constraint-related methods can pinpoint when issues arise.', question: 'Describe some common Auto Layout debugging techniques you use in Xcode to diagnose and fix layout issues.' }
-                    ]},
-                    { id: 'uikit-views', title: 'Table & Collection Views', durationHours: 9, suggestedWeek: 5, content: [
-                        { item: 'Delegate and DataSource patterns.', explanation: '`UITableView` and `UICollectionView` rely heavily on the **Delegate** and **DataSource** patterns. The `DataSource` protocol provides the data (number of sections/rows, cell content), while the `Delegate` protocol handles appearance customization, user interactions (e.g., cell selection), and dynamic behaviors.', question: 'Explain the mechanism of cell reuse in `UITableView` and `UICollectionView`, and how it contributes to performance optimization. What is `prepareForReuse()` and when should you use it?' },
-                        { item: 'Cell reuse mechanism and performance optimizations.', explanation: 'Cell reuse is fundamental to `UITableView` and `UICollectionView` performance. Instead of creating new cells for every row/item, off-screen cells are de-queued and reconfigured with new data as they scroll into view. Optimizations include transparent backgrounds, asynchronous image loading, and efficient layout calculation.', question: 'Beyond cell reuse, what other techniques would you employ to optimize scrolling performance in a `UICollectionView` that displays a large number of complex cells?' },
-                        { item: 'Implementing `UICollectionViewCompositionalLayout` or `UICollectionViewFlowLayout`.', explanation: '`UICollectionViewFlowLayout` is the simpler, default layout for grid or line-based layouts. `UICollectionViewCompositionalLayout` is a powerful, flexible layout system that allows you to compose complex layouts from smaller, self-contained layout "sections" and "items," enabling highly customized and adaptive designs.', question: 'When would you choose `UICollectionViewCompositionalLayout` over `UICollectionViewFlowLayout` for a new `UICollectionView` design? Provide a simple use case where Compositional Layout shines.' },
-                        { item: 'Using Diffable Data Sources for animated updates.', explanation: '`UICollectionViewDiffableDataSource` and `UITableViewDiffableDataSource` simplify updating collection/table views with animations. You apply "snapshots" of your data to the data source, and it automatically calculates the differences (diff) and performs the necessary insertions, deletions, and moves with smooth animations.', question: 'What problem do `Diffable Data Sources` solve compared to traditional `reloadData()` or manual `performBatchUpdates()`? Describe a situation where using a Diffable Data Source would greatly simplify your code.' }
-                    ]},
-                    { id: 'uikit-animations', title: 'Animations', durationHours: 5, suggestedWeek: 5, content: [
-                        { item: 'UIView.animate: Basic and advanced block-based animations.', explanation: '`UIView.animate` provides a high-level, block-based API for creating animations on `UIView` properties. It simplifies complex animations by handling timing, curves, and completion, making it easy to create smooth visual transitions for UI elements.', question: 'You need to implement a custom, interactive view controller transition. Outline the key protocols and methods you would need to implement, and explain the responsibilities of each component in the transition process.' },
-                        { item: 'Keyframe animations and spring animations.', explanation: '`UIView.animateKeyframes` allows you to define animations with multiple distinct stages (keyframes) over a duration, providing precise control over animation timing. **Spring animations** (using `usingSpringWithDamping` and `initialSpringVelocity`) simulate a physical spring, providing natural and bouncy motion effects.', question: 'Describe a scenario where a **spring animation** would be more appropriate and visually appealing than a linear animation. What parameters control the "bounciness" and "stiffness" of a spring animation?' },
-                        { item: 'Custom View Controller transitions.', explanation: 'Custom View Controller transitions allow you to define unique animated transitions between view controllers, moving beyond the default push, present, or modal animations. This involves implementing protocols like `UIViewControllerAnimatedTransitioning` and `UIViewControllerTransitioningDelegate`.', question: 'Outline the core components you would need to implement to create a custom non-interactive transition when presenting a modal view controller.' }
-                    ]},
-                ]
-            },
-            {
-                id: 'data-management',
-                title: 'IV. Data Management & Networking',
-                cleanTitle: 'Data Management & Networking',
-                description: 'Apps are driven by data. This section covers how to persist data locally using frameworks like Core Data and how to fetch it from remote sources efficiently and safely with URLSession.',
-                subTopics: [
-                     { id: 'data-persistence', title: 'Data Persistence', durationHours: 7, suggestedWeek: 6, content: [
-                        { item: 'Core Data: Object Graph Management, `NSManagedObjectContext`, `NSPersistentContainer`.', explanation: 'Core Data is Apple\'s persistence framework for managing and saving application data. It provides an object graph management layer, allowing you to work with objects rather than directly with databases. Key components include `NSManagedObjectContext` (for managing changes and interactions with managed objects) and `NSPersistentContainer` (which encapsulates the Core Data stack).', question: 'Explain the role of `NSManagedObjectContext` in Core Data and describe how you would perform a simple CRUD (Create, Read, Update, Delete) operation using it, considering thread safety.' },
-                        { item: 'Understanding `NSFetchRequest` and Managed Object Model.', explanation: 'A **Managed Object Model** defines the schema of your data, including entities, attributes, and relationships. `NSFetchRequest` is the primary way to retrieve managed objects from a Core Data persistent store. It allows you to specify criteria, sorting, and batching.', question: 'You need to fetch all `Book` entities that have more than 100 pages and were published after 2020. Write an `NSFetchRequest` that achieves this in Core Data.' },
-                        { item: 'Comparison with other persistence options (Realm, SQLite, UserDefaults).', explanation: 'Each persistence option has trade-offs. `UserDefaults` is for small, non-sensitive data. SQLite (and wrappers like FMDB) offers low-level database control. Realm is a mobile-first database with object-oriented APIs and often faster performance. Core Data is a powerful object graph management framework suited for complex data models.', question: 'Compare Core Data and Realm, discussing their strengths, weaknesses, and scenarios where you would choose one over the other for local data persistence in an iOS application.' }
-                     ]},
-                     { id: 'data-networking', title: 'Networking', durationHours: 6, suggestedWeek: 6, content: [
-                        { item: 'URLSessionConfiguration: default, ephemeral, background.', explanation: '`URLSessionConfiguration` defines the behavior and policies for a `URLSession`. `default` is for standard requests, `ephemeral` avoids writing caches/cookies to disk, and `background` allows transfers to continue when the app is suspended or terminated, making it suitable for large file operations.', question: 'You need to download a large file from a remote server, and the download should continue even if the user closes the app. Which `URLSessionConfiguration` would you use and why? Describe the general setup for such a task.' },
-                        { item: 'Handling network errors and timeouts.', explanation: 'Robust networking involves handling various error conditions (e.g., no internet, server errors, invalid data). `URLSession` tasks provide an `Error` object in their completion handler. Setting a `timeoutIntervalForRequest` on the configuration helps prevent indefinitely hanging requests.', question: 'Describe how you would implement robust error handling for network requests in an iOS app, including strategies for handling connection failures, server-side errors, and data parsing issues.' },
-                        { item: 'Implementing `Codable` for JSON parsing.', explanation: 'The `Codable` protocol (a type alias for `Encodable` and `Decodable`) provides a straightforward, type-safe way to convert Swift types to and from external representations like JSON or Property Lists. It leverages Swift\'s built-in `JSONEncoder` and `JSONDecoder`.', question: 'You receive a JSON response from an API with snake_case keys (e.g., `user_name`). Explain how you would map this to a Swift `Codable` struct with camelCase properties (e.g., `userName`) without manual mapping.' },
-                        { item: 'Background downloads and uploads with `URLSession`.', explanation: '`URLSession` with a background configuration allows network transfers to continue even when your app is suspended or terminated. This is critical for large file transfers or uploads that need to complete reliably. It requires proper setup of a `URLSessionDelegate` to handle events and a completion handler in `AppDelegate`.', question: 'Explain the mechanism of background `URLSession` tasks, including how the system communicates with your app when a background task completes or requires credentials.' }
-                     ]},
-                ]
-            },
-             {
-                id: 'architecture',
-                title: 'V. Architecture & Design Patterns',
+                id: 'design-patterns',
+                title: 'III. Architecture & Design Patterns',
                 cleanTitle: 'Architecture & Design Patterns',
-                description: 'Good architecture is the backbone of a scalable and maintainable app. Here we explore common iOS architectural patterns like MVC, MVVM, and VIPER, along with fundamental design patterns.',
+                description: 'Good architecture is the foundation of a maintainable and scalable app. This section explores common architectural patterns and fundamental software design patterns.',
                 subTopics: [
-                    { id: 'arch-patterns', title: 'iOS Architectures', durationHours: 6, suggestedWeek: 7, content: [
-                        { item: 'MVC (Model-View-Controller): Understanding "Massive View Controller" problem and mitigation.', explanation: 'MVC is Apple\'s default architecture, separating an app into Model (data/business logic), View (UI), and Controller (mediates between Model and View). The "Massive View Controller" problem arises when View Controllers become overloaded with too much logic. Mitigation involves moving data formatting, networking, and business logic out of the View Controller.', question: 'Compare and contrast **MVC** and **MVVM** in the context of an iOS application, highlighting their advantages and disadvantages for medium to large-scale projects.' },
-                        { item: 'MVVM (Model-View-ViewModel): Benefits and implementation.', explanation: 'MVVM separates the UI logic (View) from the business logic (Model) and the presentation logic (ViewModel). The ViewModel transforms Model data into a format suitable for the View and exposes commands/bindings that the View can interact with, improving testability and separation of concerns.', question: 'Implement a simple MVVM pattern for a screen that displays a user\'s profile, including how the View and ViewModel communicate.' },
-                        { item: 'VIPER and Clean Architecture: Principles and trade-offs.', explanation: '**VIPER** (View, Interactor, Presenter, Entity, Router) and **Clean Architecture** (layered architecture, often inspired by Uncle Bob\'s principles) are more opinionated patterns that aim for very strict separation of concerns, high testability, and independence from frameworks. They often involve more boilerplate but scale well for very large projects.', question: 'Describe the primary benefits and potential drawbacks of using a VIPER or Clean Architecture pattern in a very large iOS application compared to MVVM.' }
-                    ]},
-                    { id: 'arch-design', title: 'Design Patterns', durationHours: 5, suggestedWeek: 7, content: [
-                        { item: 'Creational: Singleton, Factory Method, Abstract Factory, Builder.', explanation: 'Creational design patterns provide ways to create objects, decoupling the client from the instantiation process. **Singleton** ensures only one instance of a class exists; **Factory Method** defines an interface for creating an object but lets subclasses decide which class to instantiate; **Builder** separates object construction from its representation.', question: 'When is the Singleton design pattern typically used in iOS development, and what are its potential drawbacks or criticisms, especially in terms of testing and flexibility?' },
-                        { item: 'Structural: Adapter, Decorator, Facade, Composite.', explanation: 'Structural design patterns deal with how classes and objects are composed to form larger structures. **Adapter** allows incompatible interfaces to work together; **Decorator** adds responsibilities to an object dynamically; **Facade** provides a simplified interface to a complex subsystem; **Composite** composes objects into tree structures to represent part-whole hierarchies.', question: 'Choose one structural design pattern (e.g., Adapter, Decorator, Facade) and explain a real-world iOS scenario where it could be effectively applied.' },
-                        { item: 'Behavioral: Delegate, Observer, Strategy, Command.', explanation: 'Behavioral design patterns deal with algorithms and the assignment of responsibilities between objects. **Delegate** allows an object to send messages to another object when an event happens; **Observer** defines a one-to-many dependency so that when one object changes state, all its dependents are notified; **Strategy** defines a family of algorithms, encapsulates each one, and makes them interchangeable.', question: 'Explain the **Delegate pattern** in iOS. When is it typically used, and how does it differ from **NotificationCenter** for communication between objects?' }
-                    ]},
+                    {
+                        id: 'patterns-architectural', title: 'Architectural Patterns', durationHours: 6, suggestedWeek: 5, content: [
+                            { item: 'MVC (Model-View-Controller) and the "Massive View Controller" problem.', explanation: 'MVC separates concerns into Model (data), View (UI), and Controller (logic). However, in iOS, the Controller often becomes a dumping ground for all logic, leading to the "Massive View Controller" problem, which makes code hard to test and maintain.', question: 'What are some specific strategies you can use to slim down a Massive View Controller? Name at least three types of logic you would move out and where you would move them to.' },
+                            { item: 'MVVM (Model-View-ViewModel) and its benefits over MVC.', explanation: 'MVVM introduces a ViewModel, which sits between the View/Controller and the Model. The ViewModel prepares data for the view, handles presentation logic, and can be easily tested without any UI. This improves separation of concerns and testability compared to MVC.', question: 'How does data binding work in an MVVM architecture? Explain with an example using either Combine or closures.' },
+                            { item: 'VIPER (View, Interactor, Presenter, Entity, Router) for large applications.', explanation: 'VIPER is a more rigid architecture that further separates responsibilities. `Interactor` handles business logic, `Presenter` handles presentation logic, and `Router` handles navigation. This strict separation is beneficial for very large teams and complex applications but comes with more boilerplate code.', question: 'What is the single responsibility of the `Interactor` in VIPER? How does it communicate its results back to the `Presenter`?' }
+                        ]
+                    },
+                    {
+                        id: 'patterns-foundational', title: 'Foundational Patterns', durationHours: 5, suggestedWeek: 5, content: [
+                            { item: 'Singleton: Use cases and drawbacks.', explanation: 'The Singleton pattern ensures that only one instance of a class exists and provides a global point of access to it. It\'s often used for shared resources like a network manager or user session. However, it can make dependency management and testing difficult.', question: 'Why is the Singleton pattern often called an "anti-pattern"? What alternative could you use to provide a shared instance while improving testability?' },
+                            { item: 'Delegate Pattern: Purpose and implementation.', explanation: 'The Delegate pattern allows one object to send messages to another object when a specific event occurs, enabling custom behavior. It defines a one-to-one communication channel. It\'s heavily used in UIKit (e.g., `UITableViewDelegate`).', question: 'What is the difference between the Delegate pattern and the Observer pattern (using NotificationCenter)? When would you choose one over the other?' },
+                            { item: 'Observer Pattern: `NotificationCenter` and Key-Value Observing (KVO).', explanation: 'The Observer pattern defines a one-to-many dependency between objects. When one object changes state, all of its dependents are notified automatically. `NotificationCenter` broadcasts notifications to any interested observers, while KVO observes changes to specific properties of `NSObject` subclasses.', question: 'How do you ensure an observer removes itself correctly when using `NotificationCenter` to avoid memory leaks or crashes?' },
+                            { item: 'Factory and Facade Patterns.', explanation: 'The Factory pattern provides an interface for creating objects in a superclass, but lets subclasses alter the type of objects that will be created. The Facade pattern provides a simplified, higher-level interface to a complex subsystem of classes.', question: 'Provide an example of where you might use the Facade pattern in an iOS app to simplify interactions with a complex framework like Core Data.' }
+                        ]
+                    }
                 ]
             },
             {
-                id: 'system-design',
-                title: 'VI. System Design (Client-Side Focus)',
-                cleanTitle: 'System Design (Client-Side Focus)',
-                description: 'System design questions for mobile roles focus on the client-side. This involves designing scalable features, optimizing for performance, ensuring offline support, and making sound architectural trade-offs.',
-                 subTopics: [
-                    { id: 'sys-scalability', title: 'Scalability & Performance', durationHours: 10, suggestedWeek: 8, content: [
-                        { item: 'Optimizing UI rendering: Minimizing `draw(_:)` calls, overdraw, cell height caching, opaque views.', explanation: 'Optimizing UI rendering is crucial for smooth animations and scrolling. Techniques include **minimizing `draw(_:)` calls** (expensive custom drawing), avoiding **overdraw** (drawing overlapping views unnecessarily), implementing **cell height caching** for table/collection views, and setting `isOpaque = true` on views that completely cover their content to optimize blending.', question: 'You are designing an image-heavy social media application with a feed of dynamically sized content. Outline a client-side strategy to optimize image loading, caching, and cell rendering performance to ensure a smooth scrolling experience, especially on older devices or slower networks.' },
-                        { item: 'Efficient image loading and caching strategies (e.g., Kingfisher, Nuke).', explanation: 'Efficient image handling involves loading images asynchronously, resizing them to display dimensions, and caching them both in memory and on disk. Libraries like Kingfisher or Nuke provide robust solutions for these concerns, improving performance and user experience.', question: 'Describe how an image caching mechanism (like one found in Kingfisher or Nuke) typically works, explaining the benefits of both in-memory and disk caching for performance.' },
-                        { item: 'App launch time optimization.', explanation: 'Optimizing app launch time is critical for user retention. Techniques include minimizing the work done in `didFinishLaunchingWithOptions`, lazy loading of modules and assets, optimizing static initializers, and reducing the complexity of the initial view hierarchy.', question: 'Your app\'s launch time is too slow. Identify at least three common causes for slow app launches and propose strategies to diagnose and optimize them.' },
-                        { item: 'Profiling with Instruments (Time Profiler, Energy Log).', explanation: 'Xcode Instruments includes tools like **Time Profiler** to identify CPU bottlenecks in your code, showing where your app spends most of its time. The **Energy Log** helps in understanding power consumption patterns, crucial for battery life optimization in mobile apps.', question: 'How would you use the Time Profiler instrument to identify performance bottlenecks in a complex `UITableViewCell`\'s layout and drawing code?' }
-                    ]},
-                    { id: 'sys-robustness', title: 'Offline-First & Robustness', durationHours: 5, suggestedWeek: 8, content: [
-                        { item: 'Strategies for handling no network connectivity: Storing data locally, showing stale data.', explanation: 'An **offline-first** approach ensures app functionality even without internet. Strategies include robust local data persistence (e.g., Core Data, Realm) to store data, displaying **stale data** (cached information) while attempting to sync in the background, and queuing user actions to be sent when connectivity is restored.', question: 'Design a feature for a messaging app that allows users to send messages even when offline. Describe the client-side architecture required to store messages locally, indicate their pending status, and send them once connectivity is restored.' },
-                        { item: 'Data synchronization strategies (e.g., pull-to-refresh, background sync).', explanation: 'Data synchronization ensures consistency between local and remote data. Strategies include **pull-to-refresh** (manual user-initiated sync), **background fetch** (system-scheduled opportunistic updates), and **silent push notifications** (server-initiated background updates).', question: 'Discuss the trade-offs between using background fetch and silent push notifications for keeping an app\'s local data synchronized with a server. When would you choose one over the other?' },
-                        { item: 'Designing for unreliable network conditions.', explanation: 'Designing for unreliable networks involves techniques like retry mechanisms with exponential backoff, circuit breakers, optimistic UI updates (assuming success and reverting on failure), and robust error messaging to the user.', question: 'How would you design a networking layer that is resilient to intermittent network connectivity and server errors, incorporating concepts like retries and graceful degradation?' }
-                    ]},
-                    { id: 'sys-modular', title: 'Modular Architecture', durationHours: 5, suggestedWeek: 9, content: [
-                        { item: 'Benefits of breaking down large applications into modules: Build times, organization, reusability.', explanation: 'Modular architecture involves dividing a large application into smaller, independent modules (e.g., frameworks, Swift packages). Benefits include **faster build times** (incremental compilation), better **organization** and separation of concerns, improved **reusability** of components across projects, and enabling parallel team development.', question: 'Your team is starting a new large-scale iOS application. Argue for or against adopting a highly modular architecture from the outset, considering factors like initial overhead, long-term maintainability, and team structure. What tools would you use for dependency management?' },
-                        { item: 'Module communication strategies (e.g., protocols, dependency injection, routing).', explanation: 'When an app is modularized, modules need to communicate without creating tight coupling. Strategies include **protocols** (defining interfaces), **dependency injection** (providing dependencies at runtime), and **routing/deep linking** (navigating between modules without direct module knowledge).', question: 'In a modular iOS app, how would you facilitate communication between a `UserProfileModule` and an `OrderHistoryModule` without creating direct dependencies between them? Describe a pattern or technique.' },
-                        { item: 'Using Swift Packages or CocoaPods/Carthage for dependency management.', explanation: '**Swift Package Manager (SPM)** is Apple\'s official solution for managing Swift dependencies, integrated directly into Xcode. **CocoaPods** and **Carthage** are third-party dependency managers widely used in the iOS ecosystem, each with their own approaches to integration and build systems.', question: 'Compare Swift Package Manager (SPM) with CocoaPods or Carthage, discussing their respective strengths, weaknesses, and typical use cases in an iOS project.' }
-                    ]},
-                ]
-            },
-             {
-                id: 'testing-tooling',
-                title: 'VII. Testing, Debugging & Tooling',
-                cleanTitle: 'Testing, Debugging & Tooling',
-                description: 'Producing high-quality software requires robust testing and debugging skills. This section covers XCTest for unit/UI testing, debugging with Xcode and Instruments, and version control best practices.',
+                id: 'performance-tooling',
+                title: 'IV. Performance, Security & Tooling',
+                cleanTitle: 'Performance, Security & Tooling',
+                description: 'A professional iOS developer must be proficient in optimizing performance, ensuring security, and using the available tools for testing and deployment.',
                 subTopics: [
-                    { id: 'test-unit', title: 'Unit & UI Testing', durationHours: 7, suggestedWeek: 9, content: [
-                        { item: 'XCTest: Writing effective unit tests for logic, view models, network layers, pure functions.', explanation: 'XCTest is Apple\'s native testing framework. **Unit tests** verify small, isolated units of code (functions, methods) to ensure they behave as expected. **UI tests** (using XCUITest) simulate user interactions on the actual app UI to validate the user experience and flow.', question: 'Explain the concept of **Dependency Injection** and how it facilitates writing more testable code in iOS, providing a simple code example or a detailed explanation of its advantages for unit testing.' },
-                        { item: 'Mocking and stubbing dependencies for isolation.', explanation: 'In unit testing, **mocking** involves creating dummy objects that mimic the behavior of real dependencies, allowing you to test a unit of code in isolation. **Stubbing** is a simpler form of mocking where you provide predefined return values for method calls. These techniques ensure tests are fast, reliable, and isolated.', question: 'Differentiate between a "mock" and a "stub" in the context of unit testing. Provide a scenario where one would be preferred over the other.' },
-                        { item: 'Test Driven Development (TDD) principles.', explanation: 'Test-Driven Development (TDD) is a software development process where tests are written *before* the code they test. The cycle is: **Red** (write a failing test), **Green** (write just enough code to make the test pass), **Refactor** (improve the code while keeping tests green). This drives better design and code quality.', question: 'Explain the "Red-Green-Refactor" cycle in TDD. What are the main benefits of practicing TDD in iOS development?' },
-                        { item: 'UI Testing with XCUITest: Recording, writing robust tests.', explanation: 'XCUITest is Apple\'s framework for UI testing, allowing you to simulate user interactions and verify UI elements. You can record UI interactions to generate basic test code, then refine it to create robust, resilient tests using accessibility identifiers and predicates.', question: 'You are writing an XCUITest for a login screen. How would you ensure your test reliably finds and interacts with the username and password text fields, even if their on-screen position changes slightly?' }
-                    ]},
-                    { id: 'test-debug', title: 'Debugging', durationHours: 6, suggestedWeek: 10, content: [
-                        { item: 'Instruments: Deep dive into Time Profiler, Allocations, Leaks, Network, Core Animation.', explanation: 'Xcode **Instruments** is a powerful suite for analyzing application performance and behavior. **Time Profiler** identifies CPU bottlenecks, **Allocations** tracks memory usage and potential leaks, **Leaks** specifically detects retain cycles, **Network** monitors network activity, and **Core Animation** helps debug rendering issues.', question: 'You suspect your iOS application has a memory leak. Describe your step-by-step process for using Xcode Instruments, specifically the **Allocations** and **Leaks** tools, to identify and diagnose the leak.' },
-                        { item: 'Using Xcode Debugger (breakpoints, variable inspection, LLDB).', explanation: 'The Xcode debugger is your primary tool for understanding code execution. **Breakpoints** pause execution at specific lines. You can inspect variable values, step through code (step over, step into, step out), and use the **LLDB** console for powerful command-line debugging and runtime modification.', question: 'Explain the difference between "Step Over," "Step Into," and "Step Out" in the Xcode debugger. When would you use each?' },
-                        { item: 'Understanding crash logs and symbolication.', explanation: 'When an iOS app crashes, the system generates a **crash log** which provides a stack trace of the threads at the time of the crash. **Symbolication** is the process of translating memory addresses in the crash log back to human-readable code (function names, line numbers) in your app, requiring debug symbols (dSYMs).', question: 'Your app is experiencing crashes in production, and you have received a crash log. Describe how you would go about analyzing and symbolication this crash log to pinpoint the source of the crash.' }
-                    ]},
-                    { id: 'test-build', title: 'Build System & Git', durationHours: 4, suggestedWeek: 10, content: [
-                        { item: 'Xcode Build Phases, Schemes, Targets.', explanation: 'An Xcode project is managed by **Targets** (defining products like apps, frameworks), **Schemes** (defining how a target is built, run, and tested), and **Build Phases** (specific steps in the build process, e.g., compiling code, copying resources). `xcconfig` files allow centralizing and overriding build settings.', question: 'Explain the primary differences between `git rebase` and `git merge`, and in what scenarios you would choose one over the other in a typical iOS development workflow with multiple contributors.' },
-                        { item: 'Understanding `xcconfig` files and build settings.', explanation: '`.xcconfig` files (Xcode configuration files) provide a way to define and manage build settings outside of the Xcode project file. They are often used for managing different environments (Debug/Release), sharing settings across multiple targets, and integrating third-party build processes.', question: 'What are the benefits of using `.xcconfig` files in a large iOS project with multiple targets and build configurations?' },
-                        { item: 'Advanced Git concepts: `rebase`, `cherry-pick`, `reflog`, resolving complex conflicts.', explanation: '`git rebase` rewrites commit history, making it linear. `git cherry-pick` applies a single commit from one branch to another. `git reflog` records updates to the HEAD and allows recovery from accidental changes. Resolving complex conflicts requires careful understanding of the conflicting changes and manual editing.', question: 'You accidentally committed sensitive information to your Git repository and pushed it. How would you fully remove this information from the commit history, ensuring it\'s no longer traceable in the repository?' }
-                    ]},
-                ]
-            },
-            {
-                id: 'advanced-ios',
-                title: 'VIII. Miscellaneous / Advanced iOS',
-                cleanTitle: 'Miscellaneous / Advanced iOS',
-                description: 'This final section covers a range of advanced and specialized iOS topics, from push notifications and Core Animation to app extensions and accessibility, which can differentiate a candidate.',
-                subTopics: [
-                     { id: 'adv-notifications', title: 'Notifications', durationHours: 4, suggestedWeek: 11, content: [
-                        { item: 'Local Notifications: Scheduling, handling in foreground/background.', explanation: 'Local Notifications are scheduled by the app and delivered by the system on the same device. They are used for time-sensitive alerts, reminders, or content updates without needing a backend server. Handling involves `UNUserNotificationCenterDelegate` methods to present or respond to notifications.', question: 'Describe the end-to-end flow of how a **push notification** is sent from a backend server and displayed on an iOS device, mentioning the key components and services involved.' },
-                        { item: 'Push Notifications: APNs, handling payloads, silent notifications.', explanation: 'Push Notifications are sent from a remote server via Apple Push Notification service (APNs) to a user\'s device. They can deliver alerts, badges, sounds, or custom data. **Silent notifications** can wake your app in the background to perform tasks (e.g., data sync) without user interaction.', question: 'What is the role of `APNs` (Apple Push Notification service) in the push notification process? Describe the differences between a standard push notification and a silent push notification.' },
-                        { item: 'Notification Content Extensions and Service Extensions.', explanation: '**Notification Service Extensions** allow you to modify the content of remote push notifications before they are displayed to the user (e.g., decrypting data, adding media). **Notification Content Extensions** provide custom UI for displaying rich notifications beyond the standard system alerts.', question: 'You want to display a custom UI with an image and action buttons for a rich push notification. Which type of Notification Extension would you use, and how would you pass data to it?' }
-                     ]},
-                     { id: 'adv-animation', title: 'Core Animation & Graphics', durationHours: 5, suggestedWeek: 11, content: [
-                        { item: 'CALayer properties and their animatability.', explanation: 'Core Animation uses `CALayer` objects to manage and render visual content. Many `CALayer` properties (e.g., `opacity`, `position`, `transform`, `backgroundColor`) are **animatable**, meaning Core Animation can interpolate values between a start and end state to create smooth transitions.', question: 'Differentiate between **Implicit Animations** and **Explicit Animations** in Core Animation. Provide a scenario where `CABasicAnimation` would be preferred over `UIView.animate` for an animation task.' },
-                        { item: 'Implicit vs. Explicit Animations.', explanation: '**Implicit animations** are automatically performed by Core Animation when an animatable property of a `CALayer` is changed, often without explicit configuration. **Explicit animations** are manually created and added to a layer using `CAAnimation` subclasses (e.g., `CABasicAnimation`, `CAKeyframeAnimation`), giving precise control over timing and behavior.', question: 'Explain the performance benefits of using Core Animation directly compared to `UIView.animate` for complex, high-frame-rate animations.' },
-                        { item: '`CAAnimationGroup` and `CAMediaTimingFunction`.', explanation: '`CAAnimationGroup` allows you to combine multiple `CAAnimation` objects and run them concurrently on a single layer. `CAMediaTimingFunction` defines the pacing of an animation (its acceleration and deceleration), allowing for custom timing curves beyond the standard ease-in/out.', question: 'You need to simultaneously animate a `CALayer`\'s position, opacity, and transform over the same duration. How would you achieve this using Core Animation?' },
-                        { item: 'Custom drawing with Core Graphics (`draw(_:)` method).', explanation: 'Core Graphics (aka Quartz 2D) is a low-level, C-based API for drawing 2D graphics in iOS. You can override the `draw(_:)` method of a `UIView` (or `CALayer` delegate) to perform custom, vector-based drawing using paths, colors, and transformations.', question: 'When would you need to implement custom drawing using `draw(_:)` and Core Graphics instead of relying solely on `UIKit`\'s standard views and layers?' }
-                     ]},
-                     { id: 'adv-extensions', title: 'App Extensions', durationHours: 3, suggestedWeek: 11, content: [
-                        { item: 'Understanding various types of app extensions (Sharing, Widget, iMessage, Custom Keyboard, Photo Editing).', explanation: 'App Extensions allow your app\'s functionality to be exposed in other parts of iOS, like sharing content (`Share Extension`), displaying information on the home screen (`Widget Extension`), or custom input methods (`Custom Keyboard Extension`). They run in a separate process from your app.', question: 'You want to allow users to quickly view a summary of data from your app without opening the full application. Which type of App Extension would you use, and how would you enable data sharing between the main app and this extension?' },
-                        { item: 'Data sharing between app and extensions (App Groups).', explanation: 'Since app extensions run in separate processes, they cannot directly access the main app\'s sandbox data. **App Groups** provide a shared container directory that multiple apps and extensions from the same developer can access, allowing secure data sharing (e.g., `UserDefaults`, files).', question: 'Explain how `App Groups` enable data sharing between a main iOS application and its associated extensions. Provide a common use case.' },
-                        { item: 'Lifecycle of an app extension.', explanation: 'App extensions have a more constrained and typically shorter lifecycle than full applications. They are launched by the system in response to a user action or system event, perform their specific task, and are then terminated. They generally do not run indefinitely in the background.', question: 'How does the lifecycle of an `Action Extension` differ from that of a typical iOS application? What are some limitations specific to extensions?' }
-                     ]}
-                ]
-            },
-            {
-                id: 'system-security',
-                title: 'IX. System Security',
-                cleanTitle: 'System Security',
-                description: 'A dedicated focus on advanced security practices for iOS applications, crucial for protecting user data and application integrity.',
-                subTopics: [
-                    { id: 'sys-security', title: 'Security', durationHours: 6, suggestedWeek: 12, content: [
-                        { item: 'Data at rest: Encryption, using Keychain for sensitive data, data protection API.', explanation: 'Protecting **data at rest** involves encrypting sensitive information stored on the device. iOS provides the **Keychain** for securely storing small pieces of data (e.g., passwords, tokens) and the **Data Protection API** for encrypting files stored in your app\'s sandbox when the device is locked, leveraging hardware encryption.', question: 'What is **SSL Pinning** in the context of iOS networking, when would you consider implementing it, and what are the key challenges or considerations involved in its deployment and maintenance?' },
-                        { item: 'Network security: HTTPS, SSL Pinning.', explanation: 'Ensuring network communication is secure is paramount. **HTTPS** encrypts data in transit. **SSL Pinning** (or Certificate Pinning) is an additional security measure where your app "pins" (stores) a server\'s certificate or public key, then verifies incoming certificates against the pinned one, preventing Man-in-the-Middle attacks even if a root certificate authority is compromised.', question: 'You suspect your app\'s network communication could be vulnerable to Man-in-the-Middle attacks. How might you implement **SSL Pinning** to mitigate this risk?' },
-                        { item: 'Biometric authentication (Face ID, Touch ID).', explanation: 'iOS provides APIs (`LocalAuthentication.LAContext`) to integrate **biometric authentication** (Face ID or Touch ID) into your app for secure user verification. This offers a convenient and robust alternative to password-based authentication for sensitive actions or access to protected data.', question: 'Describe how you would integrate Face ID or Touch ID into your iOS application to provide an additional layer of security for sensitive data or actions.' },
-                        { item: 'Code obfuscation and anti-tampering techniques.', explanation: 'While difficult to fully prevent, **code obfuscation** (making code harder to understand by humans/decompilers) and **anti-tampering** techniques (detecting if the app has been modified or is running on a jailbroken device) are used to deter reverse engineering and unauthorized modification, particularly for apps handling sensitive logic or data.', question: 'Why is **code obfuscation** often considered a "security through obscurity" measure, and what are its limitations in truly securing an iOS application?' }
-                    ]}
+                    {
+                        id: 'tooling-performance', title: 'Performance & Notifications', durationHours: 6, suggestedWeek: 6, content: [
+                            { item: 'Performance optimization techniques for responsiveness and load times.', explanation: 'This includes optimizing table/collection view scrolling by implementing cell reuse correctly, doing expensive work on background threads, and optimizing app launch time by deferring non-essential work.', question: 'Your app\'s launch time is slow. What steps would you take using Instruments to diagnose the bottleneck?' },
+                            { item: 'Debugging with Instruments (Time Profiler, Allocations, Leaks).', explanation: 'Instruments is a powerful suite of tools. Time Profiler finds CPU bottlenecks. Allocations tracks memory usage and helps find abandoned memory. Leaks specifically finds retain cycles.', question: 'How does the "Leaks" instrument detect a memory leak? What does a "cycle" in the object graph mean?' },
+                            { item: 'Efficient image loading and caching strategies.', explanation: 'Images should be loaded asynchronously. They should be cached both in memory (for quick access) and on disk (for persistence). Resizing images to the display size before they are rendered can also save significant memory and improve performance.', question: 'Describe the high-level design of a two-layer image cache (memory and disk).' },
+                            { item: 'Local and Push Notifications (APNs).', explanation: 'Local notifications are scheduled by the app itself. Push notifications are sent from a server via the Apple Push Notification service (APNs). Handling notifications involves requesting user permission and implementing delegate methods to respond when a notification is received.', question: 'What is a "silent" push notification and what is it commonly used for?' }
+                        ]
+                    },
+                    {
+                        id: 'tooling-security-testing', title: 'Security & Testing', durationHours: 7, suggestedWeek: 7, content: [
+                            { item: 'App Security: Data encryption, Keychain usage, secure communication.', explanation: 'Sensitive data should be encrypted at rest. The Keychain is the appropriate place to store small, sensitive items like passwords or tokens. All network communication must use HTTPS.', question: 'What is the difference between storing an API key in `UserDefaults` versus the `Keychain`? Why is the Keychain more secure?' },
+                            { item: 'Unit testing with XCTest and mocking dependencies.', explanation: 'Unit tests verify small, isolated pieces of code. To isolate the code under test, its dependencies (e.g., a network client) are often replaced with "mock" objects that simulate the real dependency\'s behavior in a predictable way.', question: 'What is Dependency Injection and how does it make code easier to test?' },
+                            { item: 'UI testing with XCTest.', explanation: 'UI tests automate user interactions with your app\'s UI to verify that flows and visual elements work as expected. They are slower and more brittle than unit tests but are essential for validating the end-user experience.', question: 'How can you make your UI tests more robust and less likely to break when the UI changes? What role do `accessibilityIdentifier`s play?' }
+                        ]
+                    },
+                    {
+                        id: 'tooling-cicd-deps', title: 'Build & Dependency Management', durationHours: 4, suggestedWeek: 7, content: [
+                            { item: 'CI/CD: Basic understanding of continuous integration and deployment pipelines.', explanation: 'CI/CD automates the process of building, testing, and deploying your app. A CI server (like Jenkins, GitHub Actions, or Bitrise) automatically builds the project and runs tests on every code push, ensuring new changes don\'t break the app.', question: 'What are the main benefits of having a CI/CD pipeline for an iOS project?' },
+                            { item: 'Code Signing and Provisioning Profiles.', explanation: 'Code signing is how Apple verifies that an app was created by a known developer and has not been tampered with. Provisioning profiles link the app, the developer certificate, and the device IDs, allowing the app to be installed on specific devices for testing or distributed via the App Store.', question: 'What is the difference between a development provisioning profile and a distribution provisioning profile?' },
+                            { item: 'Dependency Management: CocoaPods, Swift Package Manager (SPM), Carthage.', explanation: 'These tools automate the process of integrating third-party libraries into your project. CocoaPods is a long-standing, centralized manager. Carthage is a decentralized manager. SPM is Apple\'s official, integrated solution.', question: 'What are the main advantages of using Swift Package Manager over CocoaPods?' }
+                        ]
+                    }
                 ]
             }
         ];
+
 
         const mainNav = document.getElementById('main-nav');
         const mainContent = document.getElementById('main-content');
@@ -503,6 +412,11 @@
             const checked = subTopicPanel.querySelectorAll('input[type="checkbox"]:checked');
             const progress = checkboxes.length > 0 ? (checked.length / checkboxes.length) * 100 : 0;
 
+            const progressTextElement = subTopicPanel.querySelector('.progress-text');
+             if(progressTextElement){
+                progressTextElement.textContent = `${Math.round(progress)}% Complete`;
+             }
+
             createChart(`chart-${subTopicId}`, progress); // Update the subtopic's chart
         }
 
@@ -605,7 +519,8 @@
                 });
             });
 
-            const suggestedWeeks = uncompletedSubTopicsInThisTopic.map(sub => sub.scaledWeek).filter(week => week !== null);
+            const suggestedWeeks = uncompletedSubTopicsInThisTopic.map(sub => sub.scaledWeek).filter(week => week != null);
+
 
             if (suggestedWeeks.length === 0) { // All subtopics might be completed
                 topicStatusDiv.innerHTML = `<span class="text-green-600 text-sm font-medium">All subtopics completed for this topic! 🎉</span>`;
@@ -730,7 +645,7 @@
                 });
             }
         });
-        const ORIGINAL_MAX_WEEKS = originalMaxWeeksCalculated;
+        const ORIGINAL_MAX_WEEKS = originalMaxWeeksCalculated || 1; // Avoid division by zero
         const HIGH_INTENSITY_THRESHOLD_HOURS = 25; // Define a threshold for high weekly study hours
 
 
@@ -780,8 +695,8 @@
                                     isSubTopicCompleted = false; // Found an uncompleted item
                                 }
                             });
-                        } else { // If a subtopic has no content, consider it completed for hours calculation (e.g., placeholder subtopics)
-                            isSubTopicCompleted = true; // Assume completed if no content to check
+                        } else { // If a subtopic has no content, consider it completed for hours calculation
+                            isSubTopicCompleted = true; 
                         }
 
                         if (isSubTopicCompleted) {
@@ -908,8 +823,13 @@
                 studyPlanContainer.innerHTML += weekHTML;
             }
 
-            // After generating the plan, update all charts (overall, main topic, subtopic)
+            // After generating the plan, update all charts and topic statuses
             updateAllCharts();
+             studyData.forEach(topic => {
+                if (!topic.isStudyPlan) {
+                    updateTopicStatusDisplay(topic.id);
+                }
+            });
         }
 
 
@@ -963,14 +883,14 @@
                     // Specific content for the Study Plan page
                     innerHTML += `
                         <div class="bg-white p-6 rounded-lg shadow-sm mb-6">
-                            <h3 class="text-xl font-semibold text-gray-800 mb-4">Set Your Study Start Date</h3>
+                            <h3 class="text-xl font-semibold text-gray-800 mb-4">Set Your Study Plan</h3>
                             <div class="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4">
                                 <input type="date" id="start-date-input" class="p-2 border border-gray-300 rounded-md text-gray-800">
-                                <div class="mb-4">
+                                <div class="flex-grow">
                                     <label for="num-weeks-slider" class="block text-gray-700 text-sm font-bold mb-2">
-                                        Adjust Study Duration: <span id="num-weeks-value">12</span> weeks
+                                        Study Duration: <span id="num-weeks-value">8</span> weeks
                                     </label>
-                                    <input type="range" id="num-weeks-slider" min="4" max="24" value="12" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                                    <input type="range" id="num-weeks-slider" min="2" max="12" value="8" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
                                 </div>
                                 <button id="generate-plan-button" class="px-6 py-2 bg-[#2a665c] text-white font-semibold rounded-md shadow hover:bg-opacity-90 transition duration-200">Generate Plan</button>
                             </div>
@@ -982,7 +902,7 @@
                 } else {
                     // Tab navigation for sub-topics
                     innerHTML += `
-                        <div class="flex flex-wrap border-b border-gray-300 mb-6">
+                        <div class="flex flex-wrap border-b border-gray-300 mb-6 overflow-x-auto">
                             ${topic.subTopics.map((sub) => `
                                 <button class="tab-link px-4 py-2 text-gray-600 hover:text-[#2a665c] border-b-2 border-transparent hover:border-[#2a665c] transition duration-200 text-sm md:text-base" data-tab="${sub.id}">${sub.title}</button>
                             `).join('')}
@@ -995,10 +915,10 @@
                                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
                                     <h4 class="text-xl font-semibold text-gray-800 mb-2 md:mb-0">${sub.title}</h4>
                                     <div class="flex items-center space-x-4">
-                                        <div class="chart-container">
+                                        <span class="text-lg font-medium text-gray-600 progress-text">0% Complete</span>
+                                        <div class="chart-container" style="max-width: 100px; height: 100px;">
                                             <canvas id="chart-${sub.id}"></canvas> <!-- Chart per sub-topic -->
                                         </div>
-                                        <span class="text-lg font-medium text-gray-600 progress-text">0% Complete</span>
                                     </div>
                                 </div>
                                 <div class="border-t border-gray-200 pt-4 mt-4">
@@ -1027,15 +947,14 @@
                 if (topic.id === 'study-plan') {
                     iconSpan.textContent = '🗓️'; // Calendar emoji for study plan
                 } else {
-                    // Extract Roman numeral from 'I. Topic Name' or 'IX. Topic Name'
+                    // Extract Roman numeral from 'I. Topic Name'
                     const match = topic.title.match(/^([IVXLCDM]+\.)/);
-                    iconSpan.textContent = match ? match[1] : ''; // Get the Roman numeral part
+                    iconSpan.textContent = match ? match[1] : '•'; // Get the Roman numeral part or a bullet
                 }
                 iconSpan.className = 'font-bold text-lg flex-shrink-0';
 
                 const textSpan = document.createElement('span');
-                // Set textContent to cleanTitle if available, otherwise fallback to original title
-                // Remove the Roman numeral from the cleanTitle for display in the sidebar text
+                // Use cleanTitle if available, and remove the numeral for display
                 textSpan.textContent = (topic.cleanTitle || topic.title).replace(/^[IVXLCDM]+\.\s*/, '');
                 textSpan.className = 'sidebar-text-item flex-grow';
 
@@ -1080,19 +999,25 @@
                         }
                         allChecklistStatuses[subTopicPanelId][checkboxId] = e.target.checked;
                         localStorage.setItem('checklistStatus', JSON.stringify(allChecklistStatuses));
-
-                        // Update all charts as progress might affect overall and main topic charts
-                        updateAllCharts();
-                        // Regenerate plan to reflect progress in the schedule (this also calls updateAllCharts)
-                        generateStudyPlan();
+                        
+                        // Regenerate plan to reflect progress in the schedule, this also calls updateAllCharts
+                         if(currentStudyStartDate) {
+                           generateStudyPlan();
+                         } else {
+                           updateAllCharts();
+                         }
                     }
                 }
             });
 
             // Event listener for slider to update value display
-            document.getElementById('num-weeks-slider').addEventListener('input', function() {
-                document.getElementById('num-weeks-value').textContent = this.value;
-            });
+             const slider = document.getElementById('num-weeks-slider');
+             if(slider){
+                slider.addEventListener('input', function() {
+                    document.getElementById('num-weeks-value').textContent = this.value;
+                });
+             }
+
 
             // Event listener for button clicks (generate plan, tab switching, info toggles, study plan topic links)
             document.body.addEventListener('click', async (e) => {
